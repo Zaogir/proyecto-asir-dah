@@ -1,0 +1,47 @@
+# Actualitza els paquets (apt) dels servidors i avisa per correu del resultat.
+# Ús: ansible-playbook update_package.yml --ask-vault-pass
+- name: Update
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Check Connection
+      wait_for_connection:
+        timeout: 10
+      register: connection_result
+      ignore_errors: true
+
+    - name: update all packages to their latest version
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      ignore_errors: true
+      become: true
+      become_user: root
+      register: apt_result
+
+    - name: Send email if update is complete
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ smtp_user }}"
+        password: "{{ emailPass }}"
+        from: "{{ smtp_user }}"
+        to: "{{ admin_email }}"
+        subject: Update-Complete
+        body: "The server {{ inventory_hostname }} has been updated."
+        secure: try
+      delegate_to: localhost
+      when: connection_result is not failed
+
+    - name: Send email if there is no connection
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ smtp_user }}"
+        password: "{{ emailPass }}"
+        from: "{{ smtp_user }}"
+        to: "{{ admin_email }}"
+        subject: Connection-failed
+        body: "Alert!! the server {{ inventory_hostname }} is down and the update could not be performed."
+        secure: try
+      delegate_to: localhost
+      when: connection_result.failed

@@ -1,0 +1,26 @@
+# Comprova que els servidors responen; si no, avisa l'administrador per correu.
+# Ús: ansible-playbook check_connection.yml --ask-vault-pass
+- name: Connection
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Check Connection
+      wait_for_connection:
+        timeout: 10
+      register: connection_result
+      ignore_errors: true
+
+    - name: Send email if there is no connection
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ smtp_user }}"
+        password: "{{ emailPass }}"
+        from: "{{ smtp_user }}"
+        to: "{{ admin_email }}"
+        subject: Connection-failed
+        body: "Alert!! the server {{ inventory_hostname }} is down."
+        secure: try
+      delegate_to: localhost
+      when: connection_result.failed

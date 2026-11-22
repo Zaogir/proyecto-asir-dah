@@ -1,0 +1,25 @@
+# Fa un ping a cada servidor; si algun no és accessible, avisa l'administrador per correu.
+# Ús: ansible-playbook check_network.yml --ask-vault-pass
+- name: Network
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Check Network
+      ping:
+      register: ping_result
+      ignore_unreachable: true
+
+    - name: Send email if there is no connection
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ smtp_user }}"
+        password: "{{ emailPass }}"
+        from: "{{ smtp_user }}"
+        to: "{{ admin_email }}"
+        subject: Connection-Network-Failed
+        body: "Alert!! the server {{ inventory_hostname }} is not responding."
+        secure: try
+      delegate_to: localhost
+      when: ping_result.unreachable is defined

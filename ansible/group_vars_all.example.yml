@@ -1,0 +1,4 @@
+# Copia aquest fitxer a group_vars/all.yml (o passa les variables amb -e).
+smtp_user: tu_correo@gmail.com          # compte que envia els avisos
+admin_email: administrador@example.com  # qui rep els avisos
+# La contrasenya NO va aquí: es guarda xifrada amb Ansible Vault, vegeu README.md

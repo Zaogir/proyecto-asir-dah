@@ -1,0 +1,28 @@
+# Entorn LAMP multi-contenidor (Apache+PHP, MySQL i phpMyAdmin) - Docker Compose
+# Ús:  cp .env.example .env  &&  docker compose -f dha.yml up -d
+version: "3.8"
+services:
+  php:
+    image: php:apache
+    volumes:
+      - ./html:/var/www/html
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    restart: always
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: lamp_db
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: always
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+    ports:
+      - "8080:80"
+    restart: always

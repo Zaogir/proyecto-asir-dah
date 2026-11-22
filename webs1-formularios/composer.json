@@ -1,0 +1,7 @@
+{
+  "name": "dah/webs1-formularios",
+  "description": "Formularis web PHP (login, alta i validació de professors) del projecte DAH",
+  "require": {
+    "phpmailer/phpmailer": "^6.9"
+  }
+}
